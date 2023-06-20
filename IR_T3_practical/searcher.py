@@ -12,6 +12,11 @@ from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.naive_bayes import MultinomialNB
 from typing import Tuple,List
 import json
+from rich import print, pretty
+from rich.console import Console
+
+pretty.install()
+console = Console()
 
 class CosineSimilarity:
     def __init__(self, documents: List[Tuple[str, str]]) -> None:
@@ -99,7 +104,9 @@ class Searcher:
     files_name = []
     
     def __init__(self):
-        self.processing_json_files()
+        pass
+    def processing(self, address:str = "./docs"):
+        self.processing_json_files(address)
         
     def preprocessed_text(self, text:str )-> str:
         """This function takes a Text and removes the stop words and finds the root of the rest
@@ -132,7 +139,8 @@ class Searcher:
         return tags_str
     
     def name_of_files(self, dic_address):
-        self.files_name  = os.listdir(dic_address)
+        self.files_name = os.listdir(dic_address)
+
         return self.files_name
         
     def processing_json_files(self, dic_address="./docs/"):
@@ -198,25 +206,50 @@ class Searcher:
         
         if len(self.scores_details) != 0  :
             n_first_similarly_doc = self.get_nlargest_similarity_doc(n_first)
-            print('----------------- RESULTS ---------------------')
-            print("      SCORE         ***     DOCUMENT NAME")
-            print('-----------------------------------------------')
+            console.print('----------------- RESULTS ---------------------',style="bold green")
+            console.print("      SCORE         ***     DOCUMENT NAME")
+            console.print('-----------------------------------------------',style="bold green")
 
             for index,result in enumerate(n_first_similarly_doc):
                 
                 document_number = result[0].split(".")[0]
                 score = index + 1
-                print(f"        {score:<20}{document_number}")
+                console.print(f"        {score:<24}{document_number}")
 
         else :
-            print("Please First call search query function")
-                
+            console.print("Please First call search query function")
 
+
+#choose algo and address from terminal
+while True:                
+    try:
+        console.print("select between [red]1-[/red][green]bayes[/green] and [red]2-[/red][green]tf_idf[/green] algo :", style="bold",end="")
+        algo = int(input())
+        if algo != 1 and algo != 2:
+            console.print("[bold yellow]please enter 1 or 2[/bold yellow]")
+        else:
+            console.print("Enter address files(format:./folder_name/folder_name/):",end="",style="bold blue")
+            address = str(input())
+            if (not address.endswith("/")) or (not address.startswith("./")) :
+                console.print("Please Enter correct format address",style="bold yellow")
+            else :
+                break
+        
+    except ValueError:
+        console.print("Please enter number",style="bold red")
 
 s = Searcher()
-s.query_with_cos_algo("chat")
-s.print_results(n_first = 2)
-print("\n\n \n")
-s.query_with_bayes_algo("chat")
-s.print_results(n_first = 2)
+
+console.print("Enter query:",end="",style="bold blue")
+query = str(input())
+s.processing(address)
+
+match algo:    
+    case 1:
+        s.query_with_bayes_algo(query= query)
+    case 2:
+        s.query_with_cos_algo(query= query)
+        
+n_first_score = 5
+s.print_results(n_first= n_first_score)
 
