@@ -57,7 +57,7 @@ py main.py
 
 - data: docs, lang_docs
 - run: crawler.py, searcher.py
-- input: site_name, query
+- input: site_name, algorithm , data_folder_address
 
 ### crawler extract docs and lang_docs (python, java, javascript) data folder as json
 
